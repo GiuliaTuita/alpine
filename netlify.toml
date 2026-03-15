@@ -1,0 +1,12 @@
+[build]
+  base = "depot-cheque-web"
+  command = "npm run build"
+  publish = "dist/depot-cheque-web/browser"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
