@@ -41,14 +41,6 @@ import { AuthService } from '../../core/auth/auth.service';
             <span class="material-symbols-outlined">lock</span>
             <span>Acces reserve aux personnes autorisees via identifiant partage</span>
           </div>
-          <div class="feature-item">
-            <span class="material-symbols-outlined">photo_camera</span>
-            <span>Capture ou selection d'image depuis mobile et desktop</span>
-          </div>
-          <div class="feature-item">
-            <span class="material-symbols-outlined">cloud_upload</span>
-            <span>Verification des identifiants dans la Cloud Function avant stockage dans GCS</span>
-          </div>
         </div>
 
         @if (!authService.configured()) {

@@ -54,20 +54,170 @@ Points a definir plus tard :
 - l'URL de production du frontend
 - un renforcement eventuel de la securite
 
+## Demarrage rapide
+
+Deux facons de lancer le projet :
+
+1. `Frontend local + Cloud Function deja deployee`
+2. `Frontend local + backend local`
+
+Le mode le plus simple est le premier, car il ne demande pas de lancer la fonction backend sur votre machine.
+
+### Prerequis
+
+Installer avant de commencer :
+
+- `Node.js 20`
+- `npm`
+
+Verifier les versions :
+
+```bash
+node -v
+npm -v
+```
+
+Si le port `4200` est deja utilise, liberer le port avec :
+
+```bash
+lsof -ti tcp:4200 | xargs kill -9
+```
+
+### Option 1. Frontend local + Cloud Function deployee
+
+Ce mode utilise deja la configuration actuelle du frontend.
+
+Les fichiers suivants pointent deja vers la Cloud Function distante :
+
+- `src/environments/environment.development.ts`
+- `src/environments/environment.ts`
+
+Commandes a copier-coller :
+
+```bash
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
+npm install
+npm start -- --port 4200
+```
+
+Ouvrir ensuite :
+
+- `http://localhost:4200`
+
+Identifiants :
+
+- identifiant : `sc70`
+- mot de passe : la valeur configuree dans la Cloud Function deployee
+
+Important :
+
+- les variables `export SHARED_USERNAME=...` et `export SHARED_PASSWORD=...` dans votre terminal ne changent rien a la Cloud Function distante
+- si le mot de passe saisi dans l'application n'est pas exactement celui configure cote GCP, la connexion echouera
+
+### Option 2. Frontend local + backend local
+
+Utiliser ce mode si vous voulez tester avec vos propres variables locales.
+
+#### Etape 1. Installer les dependances
+
+```bash
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
+npm install
+npm run backend:install
+```
+
+#### Etape 2. Configurer le frontend pour le backend local
+
+Modifier `src/environments/environment.development.ts` pour utiliser :
+
+```ts
+backend: {
+  authCheckUrl: 'http://localhost:8080/?action=auth-check',
+  uploadUrl: 'http://localhost:8080/?action=upload',
+}
+```
+
+#### Etape 3. Lancer le backend local
+
+Dans un premier terminal :
+
+```bash
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
+export GCS_BUCKET_NAME="sc70-cheques"
+export ALLOWED_ORIGIN="http://localhost:4200"
+export SHARED_USERNAME="sc70"
+export SHARED_PASSWORD="123456"
+export GOOGLE_APPLICATION_CREDENTIALS="/chemin/vers/service-account.json"
+npm run backend:build
+npm run backend:start
+```
+
+#### Etape 4. Lancer le frontend local
+
+Dans un deuxieme terminal :
+
+```bash
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
+npm start -- --port 4200
+```
+
+Ouvrir ensuite :
+
+- `http://localhost:4200`
+
+Identifiants de test locaux :
+
+- identifiant : `sc70`
+- mot de passe : `123456`
+
+### Commandes minimales a copier-coller
+
+Si vous voulez juste lancer l'application avec la Cloud Function deja deployee :
+
+```bash
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
+npm install
+npm start -- --port 4200
+```
+
+Si vous voulez tout lancer en local :
+
+Terminal 1 :
+
+```bash
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
+npm install
+npm run backend:install
+export GCS_BUCKET_NAME="sc70-cheques"
+export ALLOWED_ORIGIN="http://localhost:4200"
+export SHARED_USERNAME="sc70"
+export SHARED_PASSWORD="123456"
+export GOOGLE_APPLICATION_CREDENTIALS="/chemin/vers/service-account.json"
+npm run backend:build
+npm run backend:start
+```
+
+Terminal 2 :
+
+```bash
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
+npm start -- --port 4200
+```
+
 ## Structure du projet
 
 - `src/app/features/auth`
-  page de connexion
+page de connexion
 - `src/app/features/upload`
-  page d'envoi, selection de fichier, apercu et camera
+page d'envoi, selection de fichier, apercu et camera
 - `src/app/core/auth`
-  service d'authentification, garde de route et intercepteur
+service d'authentification, garde de route et intercepteur
 - `src/app/core/upload`
-  service HTTP d'envoi
+service HTTP d'envoi
 - `src/environments`
-  configuration du frontend
+configuration du frontend
 - `backend/upload-cheque-function`
-  backend Google Cloud Function
+backend Google Cloud Function
 
 ## Flux applicatif
 
@@ -86,9 +236,9 @@ Points a definir plus tard :
 ### Lancement en local
 
 ```bash
-cd depot-cheque-web
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
 npm install
-npm start
+npm start -- --port 4200
 ```
 
 L'application est disponible sur :
@@ -98,7 +248,7 @@ L'application est disponible sur :
 ### Build
 
 ```bash
-cd depot-cheque-web
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
 npm run build
 ```
 
@@ -146,14 +296,14 @@ Le backend se trouve dans :
 ### Installation des dependances backend
 
 ```bash
-cd depot-cheque-web
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
 npm run backend:install
 ```
 
 ### Build backend
 
 ```bash
-cd depot-cheque-web
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
 npm run backend:build
 ```
 
@@ -169,13 +319,14 @@ La fonction attend :
 Exemple local :
 
 ```bash
-cd depot-cheque-web/backend/upload-cheque-function
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
 export GCS_BUCKET_NAME="sc70-cheques"
 export ALLOWED_ORIGIN="http://localhost:4200"
 export SHARED_USERNAME="sc70"
-export SHARED_PASSWORD="<mot-de-passe>"
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
-npm start
+export SHARED_PASSWORD="123456"
+export GOOGLE_APPLICATION_CREDENTIALS="/chemin/vers/service-account.json"
+npm run backend:build
+npm run backend:start
 ```
 
 ## Endpoint backend
@@ -229,7 +380,7 @@ Le frontend envoie :
 Commande de base :
 
 ```bash
-cd depot-cheque-web
+cd /Users/tuita/Desktop/cheque_app/depot-cheque-web
 gcloud functions deploy uploadCheque \
   --gen2 \
   --runtime=nodejs20 \
@@ -296,3 +447,4 @@ Evolutions recommandees pour une version suivante :
 - expiration de session cote backend
 - stockage des secrets dans un gestionnaire dedie
 - jetons de session plus robustes
+
