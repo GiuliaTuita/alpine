@@ -1,73 +1,196 @@
 .login-page {
   min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 4vw, 40px);
+}
+
+.login-shell {
+  width: min(100%, 1180px);
   display: grid;
-  place-items: center;
-  padding: 24px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 480px);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.brand-panel,
+.login-card {
+  border-radius: 32px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 70px rgba(17, 39, 71, 0.12);
+}
+
+.brand-panel {
+  padding: clamp(28px, 4vw, 44px);
+  background:
+    radial-gradient(circle at top right, rgba(109, 179, 255, 0.28), transparent 34%),
+    linear-gradient(145deg, rgba(11, 54, 98, 0.98), rgba(21, 85, 146, 0.94));
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .login-card {
-  width: min(100%, 680px);
-  padding: 32px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 20px 60px rgba(17, 39, 71, 0.12);
+  width: 100%;
+  padding: clamp(24px, 3vw, 36px);
+  background: rgba(255, 255, 255, 0.94);
 }
 
-.hero {
+.brand-showcase {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 20px;
-  align-items: start;
-  margin-bottom: 24px;
+  grid-template-columns: minmax(120px, 180px) 1fr;
+  gap: 22px;
+  align-items: center;
+  padding: 24px;
+  margin: 28px 0;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-.hero-icon {
+.brand-mark,
+.card-brand__logo {
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.brand-mark {
+  min-height: 140px;
+  padding: 20px;
+  border-radius: 26px;
+  box-shadow: 0 16px 30px rgba(6, 20, 37, 0.18);
+}
+
+.brand-mark img,
+.card-brand__logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-mark .material-symbols-outlined,
+.card-brand__logo .material-symbols-outlined {
+  color: #4b78a4;
+}
+
+.brand-copy strong {
+  display: block;
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+
+.brand-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.6;
+}
+
+.brand-tag {
+  display: inline-flex;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.card-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #f7fbff 0%, #edf4fb 100%);
+}
+
+.card-brand__logo {
+  width: 68px;
+  height: 68px;
+  padding: 12px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #1b6fd1, #6db3ff);
-  color: #fff;
-  font-size: 32px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(27, 111, 209, 0.12);
+}
+
+.card-brand__label,
+.card-brand__app {
+  margin: 0;
+}
+
+.card-brand__label {
+  color: #17426d;
+  font-weight: 700;
+}
+
+.card-brand__app {
+  color: #607286;
+  margin-top: 4px;
 }
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #2f5b88;
+  color: rgba(255, 255, 255, 0.72);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.78rem;
 }
 
-h1 {
+.brand-panel h1 {
   margin: 0;
-  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-size: clamp(2.3rem, 4vw, 4rem);
   line-height: 1.1;
 }
 
 .subtitle {
   margin: 12px 0 0;
-  color: #4b5c70;
-  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
 }
 
 .feature-list {
   display: grid;
   gap: 14px;
-  margin-bottom: 24px;
 }
 
 .feature-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 14px 16px;
   border-radius: 16px;
-  background: #f4f8fd;
-  color: #26415f;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.feature-item .material-symbols-outlined {
+  margin-top: 2px;
+}
+
+.hero {
+  margin-bottom: 24px;
+}
+
+.hero h2 {
+  margin: 0;
+  font-size: clamp(1.7rem, 2.4vw, 2.2rem);
+  line-height: 1.15;
+}
+
+.hero-text {
+  margin: 12px 0 0;
+  color: #4b5c70;
+  line-height: 1.6;
 }
 
 .warning-box,
@@ -117,12 +240,34 @@ mat-form-field {
   font-size: 20px;
 }
 
+@media (max-width: 960px) {
+  .login-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-panel {
+    min-height: 0;
+  }
+}
+
 @media (max-width: 640px) {
+  .login-page {
+    padding: 16px;
+  }
+
   .login-card {
     padding: 24px;
   }
 
-  .hero {
+  .brand-panel {
+    padding: 24px;
+  }
+
+  .brand-showcase {
     grid-template-columns: 1fr;
+  }
+
+  .brand-mark {
+    min-height: 110px;
   }
 }

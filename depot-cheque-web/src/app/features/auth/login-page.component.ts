@@ -24,83 +24,139 @@ import { AuthService } from '../../core/auth/auth.service';
   ],
   template: `
     <main class="login-page">
-      <mat-card class="login-card" appearance="outlined">
-        <div class="hero">
-          <span class="hero-icon material-symbols-outlined">credit_card</span>
-          <div>
-            <p class="eyebrow">{{ appName }}</p>
-            <h1>Depot de cheque simplifie</h1>
-            <p class="subtitle">
-              Saisissez l'identifiant partage et le mot de passe commun pour acceder a l'envoi.
-            </p>
+      <section class="login-shell">
+        <section class="brand-panel">
+          <p class="eyebrow">Espace de depot securise</p>
+          <h1>Valorisez l'identite de {{ clientName }}</h1>
+          <p class="subtitle">
+            Une page d'accueil plus premium, avec le logo client mis en avant des la connexion.
+          </p>
+
+          <div class="brand-showcase">
+            <div class="brand-mark">
+              @if (showBrandLogo()) {
+                <img
+                  [src]="brandLogoUrl"
+                  [alt]="'Logo ' + clientName"
+                  (error)="hideBrandLogo()"
+                />
+              } @else {
+                <span class="material-symbols-outlined">image</span>
+              }
+            </div>
+
+            <div class="brand-copy">
+              <span class="brand-tag">Client mis en avant</span>
+              <strong>{{ clientName }}</strong>
+              <p>
+                Ajoutez le fichier du logo dans <code>logo</code> pour personnaliser
+                immediatement cette zone.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div class="feature-list">
-          <div class="feature-item">
-            <span class="material-symbols-outlined">lock</span>
-            <span>Acces reserve aux personnes autorisees via identifiant partage</span>
+          <div class="feature-list">
+            <div class="feature-item">
+              <span class="material-symbols-outlined">verified_user</span>
+              <span>Authentification reservee aux personnes autorisees</span>
+            </div>
+            <div class="feature-item">
+              <span class="material-symbols-outlined">imagesearch_roller</span>
+              <span>Presence visuelle forte pour rassurer et valoriser la marque cliente</span>
+            </div>
           </div>
-        </div>
+        </section>
 
-        @if (!authService.configured()) {
-          <section class="warning-box">
-            <strong>Configuration requise</strong>
-            <p>
-              Completez les URLs backend dans <code>src/environments</code> avant de vous connecter.
-            </p>
-          </section>
-        }
+        <mat-card class="login-card" appearance="outlined">
+          <div class="card-brand">
+            <div class="card-brand__logo">
+              @if (showBrandLogo()) {
+                <img
+                  [src]="brandLogoUrl"
+                  [alt]="'Logo ' + clientName"
+                  (error)="hideBrandLogo()"
+                />
+              } @else {
+                <span class="material-symbols-outlined">credit_card</span>
+              }
+            </div>
+            <div>
+              <p class="card-brand__label">{{ clientName }}</p>
+              <p class="card-brand__app">{{ appName }}</p>
+            </div>
+          </div>
 
-        @if (errorMessage()) {
-          <section class="error-box">
-            {{ errorMessage() }}
-          </section>
-        }
+          <div class="hero">
+            <div>
+              <h2>Connexion a l'espace de depot</h2>
+              <p class="hero-text">
+                Saisissez l'identifiant partage et le mot de passe commun pour acceder a l'envoi.
+              </p>
+            </div>
+          </div>
 
-        <form class="login-form" [formGroup]="form" (ngSubmit)="login()">
-          <mat-form-field appearance="outline">
-            <mat-label>Identifiant</mat-label>
-            <input matInput type="text" formControlName="username" autocomplete="username" />
-          </mat-form-field>
+          @if (!authService.configured()) {
+            <section class="warning-box">
+              <strong>Configuration requise</strong>
+              <p>
+                Completez les URLs backend dans <code>src/environments</code> avant de vous connecter.
+              </p>
+            </section>
+          }
 
-          <mat-form-field appearance="outline">
-            <mat-label>Mot de passe</mat-label>
-            <input
-              matInput
-              type="password"
-              formControlName="password"
-              autocomplete="current-password"
-            />
-          </mat-form-field>
+          @if (errorMessage()) {
+            <section class="error-box">
+              {{ errorMessage() }}
+            </section>
+          }
 
-          <button
-            mat-flat-button
-            class="login-button"
-            type="submit"
-            [disabled]="form.invalid || isSubmitting() || !authService.configured()"
-          >
-            @if (isSubmitting()) {
-              <mat-spinner diameter="20"></mat-spinner>
-            } @else {
-              <span class="material-symbols-outlined button-icon">login</span>
-            }
-            <span>Se connecter</span>
-          </button>
-        </form>
-      </mat-card>
+          <form class="login-form" [formGroup]="form" (ngSubmit)="login()">
+            <mat-form-field appearance="outline">
+              <mat-label>Identifiant</mat-label>
+              <input matInput type="text" formControlName="username" autocomplete="username" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Mot de passe</mat-label>
+              <input
+                matInput
+                type="password"
+                formControlName="password"
+                autocomplete="current-password"
+              />
+            </mat-form-field>
+
+            <button
+              mat-flat-button
+              class="login-button"
+              type="submit"
+              [disabled]="form.invalid || isSubmitting() || !authService.configured()"
+            >
+              @if (isSubmitting()) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                <span class="material-symbols-outlined button-icon">login</span>
+              }
+              <span>Se connecter</span>
+            </button>
+          </form>
+        </mat-card>
+      </section>
     </main>
   `,
   styleUrl: './login-page.component.scss',
 })
 export class LoginPageComponent {
   protected readonly appName = environment.appName;
+  protected readonly clientName = environment.brand.clientName;
+  protected readonly brandLogoUrl = environment.brand.logoPath;
   protected readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
 
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly isSubmitting = signal(false);
+  protected readonly showBrandLogo = signal(Boolean(this.brandLogoUrl));
   protected readonly form = this.formBuilder.nonNullable.group({
     username: ['', Validators.required],
     password: ['', Validators.required],
@@ -132,6 +188,10 @@ export class LoginPageComponent {
       console.info('[LoginPage] Login request finished.');
       this.isSubmitting.set(false);
     }
+  }
+
+  protected hideBrandLogo(): void {
+    this.showBrandLogo.set(false);
   }
 
   private toMessage(error: unknown): string {

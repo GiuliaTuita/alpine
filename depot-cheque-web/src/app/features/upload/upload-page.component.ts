@@ -26,8 +26,17 @@ import { UploadResponse } from '../../shared/models/upload-response.model';
   template: `
     <mat-toolbar class="topbar">
       <div class="topbar__brand">
-        <span class="material-symbols-outlined">credit_card</span>
-        <span>{{ appName }}</span>
+        <div class="topbar__logo">
+          @if (showBrandLogo()) {
+            <img [src]="brandLogoUrl" [alt]="'Logo ' + clientName" (error)="hideBrandLogo()" />
+          } @else {
+            <span class="material-symbols-outlined">credit_card</span>
+          }
+        </div>
+        <div>
+          <p class="topbar__client">{{ clientName }}</p>
+          <p class="topbar__app">{{ appName }}</p>
+        </div>
       </div>
 
       <div class="topbar__user">
@@ -41,10 +50,32 @@ import { UploadResponse } from '../../shared/models/upload-response.model';
 
     <main class="upload-page">
       <mat-card class="upload-card" appearance="outlined">
+        <section class="brand-banner">
+          <div class="brand-banner__copy">
+            <p class="eyebrow">Identite visuelle client</p>
+            <h1>Espace de depot de cheque {{ clientName }}</h1>
+            <p class="subtitle">
+              Une interface plus premium pour guider l'envoi tout en mettant la marque du client au
+              premier plan.
+            </p>
+          </div>
+
+          <div class="brand-banner__logo">
+            @if (showBrandLogo()) {
+              <img [src]="brandLogoUrl" [alt]="'Logo ' + clientName" (error)="hideBrandLogo()" />
+            } @else {
+              <div class="brand-banner__placeholder">
+                <span class="material-symbols-outlined">image</span>
+                <span>Ajoutez le logo dans <code>logo</code></span>
+              </div>
+            }
+          </div>
+        </section>
+
         <div class="header">
           <div>
-            <h1>Envoi du cheque</h1>
-            <p class="subtitle">
+            <h2>Envoi du cheque</h2>
+            <p class="header-subtitle">
               Prenez une photo nette du cheque seul, sur un fond distinct, sans autres feuilles ni
               ecritures. Cadrez-le bien et gardez l'image droite.
             </p>
@@ -184,6 +215,8 @@ export class UploadPageComponent implements OnDestroy {
   @ViewChild('cameraVideo') private cameraVideo?: ElementRef<HTMLVideoElement>;
 
   protected readonly appName = environment.appName;
+  protected readonly clientName = environment.brand.clientName;
+  protected readonly brandLogoUrl = environment.brand.logoPath;
   protected readonly maxFileSizeMb = environment.upload.maxFileSizeMb;
   protected readonly authService = inject(AuthService);
   private readonly uploadService = inject(UploadService);
@@ -199,6 +232,7 @@ export class UploadPageComponent implements OnDestroy {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly uploadSuccess = signal<UploadResponse | null>(null);
   protected readonly isUploading = signal(false);
+  protected readonly showBrandLogo = signal(Boolean(this.brandLogoUrl));
   protected readonly displayName = computed(() => this.authService.username() || 'Utilisateur');
   protected readonly selectedFileName = computed(() => this.selectedFile()?.name ?? '');
   protected readonly selectedFileSizeLabel = computed(() => {
@@ -376,6 +410,10 @@ export class UploadPageComponent implements OnDestroy {
     console.info('[UploadPage] Logout requested.');
     this.authService.logout();
     await this.router.navigateByUrl('/login');
+  }
+
+  protected hideBrandLogo(): void {
+    this.showBrandLogo.set(false);
   }
 
   private revokePreviewUrl(): void {

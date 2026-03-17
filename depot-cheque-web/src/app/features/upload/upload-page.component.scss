@@ -20,8 +20,39 @@
 }
 
 .topbar__brand {
-  font-weight: 700;
   color: #123d68;
+}
+
+.topbar__logo {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(27, 111, 209, 0.1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.topbar__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.topbar__client,
+.topbar__app {
+  margin: 0;
+}
+
+.topbar__client {
+  font-weight: 700;
+}
+
+.topbar__app {
+  color: #607286;
 }
 
 .user-name {
@@ -39,6 +70,44 @@
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 20px 60px rgba(17, 39, 71, 0.12);
+}
+
+.brand-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 320px);
+  gap: 24px;
+  align-items: center;
+  padding: clamp(22px, 3vw, 32px);
+  margin-bottom: 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(109, 179, 255, 0.26), transparent 36%),
+    linear-gradient(140deg, #0f4a83, #1b6fd1);
+  color: #fff;
+}
+
+.brand-banner__logo {
+  min-height: 180px;
+  padding: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.brand-banner__logo img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+}
+
+.brand-banner__placeholder {
+  display: grid;
+  gap: 10px;
+  place-items: center;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .header {
@@ -65,8 +134,19 @@ h1 {
 
 .subtitle {
   margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.6;
+}
+
+h2 {
+  margin: 0;
+  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+  line-height: 1.15;
+}
+
+.header-subtitle {
+  margin: 12px 0 0;
   color: #4b5c70;
-  line-height: 1.5;
 }
 
 .hero-icon {
@@ -201,7 +281,6 @@ h1 {
 
 .button-icon {
   font-size: 20px;
-  vertical-align: middle;
 }
 
 @media (max-width: 768px) {
@@ -220,6 +299,10 @@ h1 {
   .footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .brand-banner {
+    grid-template-columns: 1fr;
   }
 
   .hero-icon {
