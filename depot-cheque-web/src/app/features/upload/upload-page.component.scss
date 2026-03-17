@@ -56,8 +56,12 @@
 }
 
 .logout-button {
+  min-width: 44px;
+  height: 44px;
+  padding-inline: 14px !important;
   border-color: rgba(35, 33, 38, 0.14) !important;
   color: var(--brand-dark) !important;
+  border-radius: 999px !important;
 }
 
 .logout-button__label {
@@ -300,12 +304,9 @@ h1 {
 }
 
 @media (max-width: 520px) {
-  .topbar {
-    grid-template-columns: 1fr;
-  }
-
   .topbar__user {
     justify-content: flex-end;
+    width: auto;
   }
 
   .topbar__app,
@@ -315,7 +316,6 @@ h1 {
   }
 
   .logout-button {
-    min-width: 44px;
     width: 44px;
     padding-inline: 0;
   }
@@ -327,8 +327,7 @@ h1 {
 
   .actions button,
   .camera-actions button,
-  .footer button,
-  .topbar__user {
+  .footer button {
     width: 100%;
   }
 }

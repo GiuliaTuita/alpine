@@ -45,15 +45,6 @@ import { AuthService } from '../../core/auth/auth.service';
             </div>
           </div>
 
-          <div class="hero">
-            <div>
-              <h2>Connexion a l'espace de depot</h2>
-              <p class="hero-text">
-                Saisissez l'identifiant partage et le mot de passe commun pour acceder a l'envoi.
-              </p>
-            </div>
-          </div>
-
           <div class="feature-list">
             <div class="feature-item">
               <span class="material-symbols-outlined">verified_user</span>
