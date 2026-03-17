@@ -41,46 +41,34 @@ import { UploadResponse } from '../../shared/models/upload-response.model';
 
       <div class="topbar__user">
         <span class="user-name">{{ displayName() }}</span>
-        <button mat-stroked-button type="button" (click)="logout()">
+        <button mat-stroked-button class="logout-button" type="button" (click)="logout()">
           <span class="material-symbols-outlined button-icon">logout</span>
-          Se deconnecter
+          <span class="logout-button__label">Se deconnecter</span>
         </button>
       </div>
     </mat-toolbar>
 
     <main class="upload-page">
       <mat-card class="upload-card" appearance="outlined">
-        <section class="brand-banner">
-          <div class="brand-banner__copy">
-            <p class="eyebrow">Identite visuelle client</p>
-            <h1>Espace de depot de cheque {{ clientName }}</h1>
-            <p class="subtitle">
-              Une interface plus premium pour guider l'envoi tout en mettant la marque du client au
-              premier plan.
-            </p>
-          </div>
-
-          <div class="brand-banner__logo">
-            @if (showBrandLogo()) {
-              <img [src]="brandLogoUrl" [alt]="'Logo ' + clientName" (error)="hideBrandLogo()" />
-            } @else {
-              <div class="brand-banner__placeholder">
-                <span class="material-symbols-outlined">image</span>
-                <span>Ajoutez le logo dans <code>logo</code></span>
-              </div>
-            }
-          </div>
-        </section>
-
         <div class="header">
-          <div>
-            <h2>Envoi du cheque</h2>
+          <div class="header__copy">
+            <p class="eyebrow">Depot mobile</p>
+            <h1>Envoi du cheque</h1>
             <p class="header-subtitle">
               Prenez une photo nette du cheque seul, sur un fond distinct, sans autres feuilles ni
               ecritures. Cadrez-le bien et gardez l'image droite.
             </p>
           </div>
-          <span class="hero-icon material-symbols-outlined">cloud_upload</span>
+          <div class="header__brand">
+            <div class="header__logo">
+              @if (showBrandLogo()) {
+                <img [src]="brandLogoUrl" [alt]="'Logo ' + clientName" (error)="hideBrandLogo()" />
+              } @else {
+                <span class="material-symbols-outlined">credit_card</span>
+              }
+            </div>
+            <p class="header__client">{{ clientName }}</p>
+          </div>
         </div>
 
         @if (!backendConfigured()) {

@@ -25,51 +25,9 @@ import { AuthService } from '../../core/auth/auth.service';
   template: `
     <main class="login-page">
       <section class="login-shell">
-        <section class="brand-panel">
-          <p class="eyebrow">Espace de depot securise</p>
-          <h1>Valorisez l'identite de {{ clientName }}</h1>
-          <p class="subtitle">
-            Une page d'accueil plus premium, avec le logo client mis en avant des la connexion.
-          </p>
-
-          <div class="brand-showcase">
-            <div class="brand-mark">
-              @if (showBrandLogo()) {
-                <img
-                  [src]="brandLogoUrl"
-                  [alt]="'Logo ' + clientName"
-                  (error)="hideBrandLogo()"
-                />
-              } @else {
-                <span class="material-symbols-outlined">image</span>
-              }
-            </div>
-
-            <div class="brand-copy">
-              <span class="brand-tag">Client mis en avant</span>
-              <strong>{{ clientName }}</strong>
-              <p>
-                Ajoutez le fichier du logo dans <code>logo</code> pour personnaliser
-                immediatement cette zone.
-              </p>
-            </div>
-          </div>
-
-          <div class="feature-list">
-            <div class="feature-item">
-              <span class="material-symbols-outlined">verified_user</span>
-              <span>Authentification reservee aux personnes autorisees</span>
-            </div>
-            <div class="feature-item">
-              <span class="material-symbols-outlined">imagesearch_roller</span>
-              <span>Presence visuelle forte pour rassurer et valoriser la marque cliente</span>
-            </div>
-          </div>
-        </section>
-
         <mat-card class="login-card" appearance="outlined">
-          <div class="card-brand">
-            <div class="card-brand__logo">
+          <div class="brand-head">
+            <div class="brand-head__logo">
               @if (showBrandLogo()) {
                 <img
                   [src]="brandLogoUrl"
@@ -80,9 +38,10 @@ import { AuthService } from '../../core/auth/auth.service';
                 <span class="material-symbols-outlined">credit_card</span>
               }
             </div>
-            <div>
-              <p class="card-brand__label">{{ clientName }}</p>
-              <p class="card-brand__app">{{ appName }}</p>
+            <div class="brand-head__copy">
+              <p class="eyebrow">{{ appName }}</p>
+              <h1>{{ clientName }}</h1>
+              <p class="subtitle">Connexion rapide et optimisee pour l'envoi depuis mobile.</p>
             </div>
           </div>
 
@@ -92,6 +51,17 @@ import { AuthService } from '../../core/auth/auth.service';
               <p class="hero-text">
                 Saisissez l'identifiant partage et le mot de passe commun pour acceder a l'envoi.
               </p>
+            </div>
+          </div>
+
+          <div class="feature-list">
+            <div class="feature-item">
+              <span class="material-symbols-outlined">verified_user</span>
+              <span>Acces securise reserve aux personnes autorisees</span>
+            </div>
+            <div class="feature-item">
+              <span class="material-symbols-outlined">smartphone</span>
+              <span>Parcours pense pour une utilisation simple sur telephone</span>
             </div>
           </div>
 
