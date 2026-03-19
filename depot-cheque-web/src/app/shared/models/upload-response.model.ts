@@ -5,4 +5,5 @@ export interface UploadResponse {
   gsUri: string;
   contentType: string;
   uploadedAt: string;
+  registrationNumber?: string;
 }

@@ -5,8 +5,14 @@ import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import {
+  getRegistrationNumberValidationMessage,
+  normalizeRegistrationNumber,
+} from '../../../../backend/upload-cheque-function/src/shared/upload-rules';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth/auth.service';
 import { UploadService } from '../../core/upload/upload.service';
@@ -20,6 +26,8 @@ import { UploadResponse } from '../../shared/models/upload-response.model';
     MatButtonModule,
     MatCardModule,
     MatDividerModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatProgressBarModule,
     MatToolbarModule,
   ],
@@ -54,10 +62,6 @@ import { UploadResponse } from '../../shared/models/upload-response.model';
           <div class="header__copy">
             <p class="eyebrow">Depot mobile</p>
             <h1>Envoi du cheque</h1>
-            <p class="header-subtitle">
-              Prenez une photo nette du cheque seul, sur un fond distinct, sans autres feuilles ni
-              ecritures. Cadrez-le bien et gardez l'image droite.
-            </p>
           </div>
           <div class="header__brand">
             <div class="header__logo">
@@ -95,83 +99,123 @@ import { UploadResponse } from '../../shared/models/upload-response.model';
           </section>
         }
 
-        <div class="actions">
-          <input
-            #fileInput
-            hidden
-            type="file"
-            accept="image/*"
-            capture="environment"
-            (change)="onFileSelected($event)"
-          />
-
-          <button mat-stroked-button type="button" (click)="openPicker(fileInput)">
-            <span class="material-symbols-outlined button-icon">image</span>
-            Choisir une photo
-          </button>
-
-          <button
-            mat-stroked-button
-            type="button"
-            [disabled]="isStartingCamera()"
-            (click)="openCamera()"
-          >
-            <span class="material-symbols-outlined button-icon">photo_camera</span>
-            @if (isStartingCamera()) {
-              Ouverture de la camera...
-            } @else {
-              Prendre une photo
-            }
-          </button>
-
-          @if (selectedFileName()) {
-            <button mat-button type="button" (click)="clearSelection(fileInput)">
-              <span class="material-symbols-outlined button-icon">delete</span>
-              Supprimer
-            </button>
-          }
-        </div>
-
-        @if (isCameraOpen()) {
-          <section class="camera-panel">
-            <div class="camera-preview">
-              <video #cameraVideo autoplay playsinline muted></video>
-            </div>
-
-            <div class="camera-actions">
-              <button mat-flat-button color="primary" type="button" (click)="capturePhoto()">
-                <span class="material-symbols-outlined button-icon">photo_camera</span>
-                Capturer
-              </button>
-
-              <button mat-button type="button" (click)="closeCamera()">
-                <span class="material-symbols-outlined button-icon">close</span>
-                Fermer la camera
-              </button>
-            </div>
-          </section>
-        }
-
-        @if (selectedFileName()) {
-          <div class="file-meta">
-            <span class="material-symbols-outlined">image</span>
+        <section class="form-section">
+          <div class="section-heading">
+            <span class="section-heading__step">1</span>
             <div>
-              <strong>{{ selectedFileName() }}</strong>
-              <p>{{ selectedFileSizeLabel() }}</p>
+              <h2>Renseignez l'immatriculation</h2>
+              <p>Saisissez le numero du vehicule avant d'envoyer le cheque.</p>
             </div>
           </div>
-        }
 
-        @if (previewUrl()) {
-          <div class="preview">
-            <img [src]="previewUrl()" alt="Apercu du cheque selectionne" />
+          <section class="registration-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Numero d'immatriculation</mat-label>
+              <input
+                matInput
+                type="text"
+                maxlength="10"
+                [value]="registrationNumberInput()"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                placeholder="AB123CD ou 1234AB56"
+                (input)="onRegistrationNumberInput($event)"
+                (blur)="registrationNumberTouched.set(true)"
+              />
+            </mat-form-field>
+
+            @if (shouldShowRegistrationNumberError()) {
+              <p class="registration-field__error">{{ registrationNumberError() }}</p>
+            } @else {
+              <p class="registration-field__hint">Formats acceptes : AB123CD ou 1234AB56.</p>
+            }
+          </section>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span class="section-heading__step">2</span>
+            <div>
+              <h2>Ajoutez la photo du cheque</h2>
+              <p>Prenez une photo bien droite du cheque seul, sans feuilles ni ecritures visibles derriere.</p>
+            </div>
           </div>
-        } @else {
-          <div class="empty-state">
-            <span class="material-symbols-outlined">gallery_thumbnail</span>
-            <p>Aucune image selectionnee pour le moment.</p>
+
+          <div class="actions">
+            <input
+              #fileInput
+              hidden
+              type="file"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+            />
+
+            <button mat-stroked-button class="action-button" type="button" (click)="openPicker(fileInput)">
+              <span class="action-button__content">
+                <span class="material-symbols-outlined button-icon action-button__icon">image</span>
+                <span class="action-button__label">Choisir une photo</span>
+              </span>
+            </button>
+
+            <button
+              mat-stroked-button
+              class="action-button"
+              type="button"
+              [disabled]="isStartingCamera()"
+              (click)="openCamera()"
+            >
+              <span class="action-button__content">
+                <span class="material-symbols-outlined button-icon action-button__icon">photo_camera</span>
+                <span class="action-button__label">
+                  @if (isStartingCamera()) {
+                    Ouverture de la camera...
+                  } @else {
+                    Prendre une photo
+                  }
+                </span>
+              </span>
+            </button>
+
+            @if (selectedFileName()) {
+              <button
+                mat-stroked-button
+                class="clear-selection-button"
+                type="button"
+                (click)="clearSelection(fileInput)"
+              >
+                <span class="material-symbols-outlined button-icon">delete</span>
+                Supprimer la photo
+              </button>
+            }
           </div>
-        }
+
+          @if (isCameraOpen()) {
+            <section class="camera-panel">
+              <div class="camera-preview">
+                <video #cameraVideo autoplay playsinline muted></video>
+              </div>
+
+              <div class="camera-actions">
+                <button mat-flat-button color="primary" type="button" (click)="capturePhoto()">
+                  <span class="material-symbols-outlined button-icon">photo_camera</span>
+                  Capturer
+                </button>
+
+                <button mat-button type="button" (click)="closeCamera()">
+                  <span class="material-symbols-outlined button-icon">close</span>
+                  Fermer la camera
+                </button>
+              </div>
+            </section>
+          }
+
+          @if (previewUrl()) {
+            <div class="preview">
+              <img [src]="previewUrl()" alt="Apercu du cheque selectionne" />
+            </div>
+          }
+        </section>
 
         <mat-divider></mat-divider>
 
@@ -180,9 +224,6 @@ import { UploadResponse } from '../../shared/models/upload-response.model';
         }
 
         <div class="footer">
-          <p class="helper-text">
-            Formats acceptes: JPEG, PNG, WEBP, HEIC, HEIF. Taille max: {{ maxFileSizeMb }} Mo.
-          </p>
           <button
             mat-flat-button
             color="primary"
@@ -201,6 +242,7 @@ import { UploadResponse } from '../../shared/models/upload-response.model';
 })
 export class UploadPageComponent implements OnDestroy {
   @ViewChild('cameraVideo') private cameraVideo?: ElementRef<HTMLVideoElement>;
+  @ViewChild('fileInput') private fileInput?: ElementRef<HTMLInputElement>;
 
   protected readonly appName = environment.appName;
   protected readonly clientName = environment.brand.clientName;
@@ -222,18 +264,24 @@ export class UploadPageComponent implements OnDestroy {
   protected readonly isUploading = signal(false);
   protected readonly showBrandLogo = signal(Boolean(this.brandLogoUrl));
   protected readonly displayName = computed(() => this.authService.username() || 'Utilisateur');
+  protected readonly registrationNumberInput = signal('');
+  protected readonly registrationNumberTouched = signal(false);
+  protected readonly normalizedRegistrationNumber = computed(() =>
+    normalizeRegistrationNumber(this.registrationNumberInput()),
+  );
+  protected readonly registrationNumberError = computed(() =>
+    getRegistrationNumberValidationMessage(this.registrationNumberInput()),
+  );
+  protected readonly shouldShowRegistrationNumberError = computed(
+    () => this.registrationNumberTouched() && !!this.registrationNumberError(),
+  );
   protected readonly selectedFileName = computed(() => this.selectedFile()?.name ?? '');
-  protected readonly selectedFileSizeLabel = computed(() => {
-    const file = this.selectedFile();
-
-    if (!file) {
-      return '';
-    }
-
-    return `${(file.size / 1024 / 1024).toFixed(2)} Mo`;
-  });
   protected readonly canSubmit = computed(
-    () => !!this.selectedFile() && !this.isUploading() && this.backendConfigured(),
+    () =>
+      !!this.selectedFile() &&
+      !this.isUploading() &&
+      this.backendConfigured() &&
+      !this.registrationNumberError(),
   );
   private mediaStream: MediaStream | null = null;
 
@@ -265,11 +313,9 @@ export class UploadPageComponent implements OnDestroy {
 
   protected clearSelection(fileInput: HTMLInputElement): void {
     console.info('[UploadPage] Clearing current file selection.');
-    fileInput.value = '';
-    this.selectedFile.set(null);
+    this.resetSelectedFile(fileInput);
     this.errorMessage.set(null);
     this.uploadSuccess.set(null);
-    this.revokePreviewUrl();
   }
 
   protected async openCamera(): Promise<void> {
@@ -360,11 +406,20 @@ export class UploadPageComponent implements OnDestroy {
 
   protected async submit(): Promise<void> {
     const file = this.selectedFile();
+    const registrationNumber = this.normalizedRegistrationNumber();
 
     if (!file || this.isUploading()) {
       console.warn('[UploadPage] Submit ignored.', {
         hasFile: !!file,
         isUploading: this.isUploading(),
+      });
+      return;
+    }
+
+    if (this.registrationNumberError()) {
+      this.registrationNumberTouched.set(true);
+      console.warn('[UploadPage] Submit ignored because registration number is invalid.', {
+        registrationNumber,
       });
       return;
     }
@@ -376,15 +431,21 @@ export class UploadPageComponent implements OnDestroy {
     console.info('[UploadPage] Starting submit flow.', {
       name: file.name,
       size: file.size,
+      registrationNumber,
     });
 
     try {
-      const response = await firstValueFrom(this.uploadService.uploadCheque(file));
+      const response = await firstValueFrom(
+        this.uploadService.uploadCheque(file, registrationNumber),
+      );
       console.info('[UploadPage] Submit flow succeeded.', {
         fileId: response.fileId,
         storagePath: response.storagePath,
       });
       this.uploadSuccess.set(response);
+      this.resetSelectedFile();
+      this.registrationNumberInput.set('');
+      this.registrationNumberTouched.set(false);
     } catch (error) {
       console.error('[UploadPage] Submit flow failed.', { error });
       this.errorMessage.set(this.toMessage(error));
@@ -404,6 +465,15 @@ export class UploadPageComponent implements OnDestroy {
     this.showBrandLogo.set(false);
   }
 
+  protected onRegistrationNumberInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const normalizedValue = normalizeRegistrationNumber(input.value);
+
+    this.registrationNumberInput.set(normalizedValue);
+    this.registrationNumberTouched.set(true);
+    input.value = normalizedValue;
+  }
+
   private revokePreviewUrl(): void {
     const url = this.previewUrl();
 
@@ -411,6 +481,17 @@ export class UploadPageComponent implements OnDestroy {
       URL.revokeObjectURL(url);
       this.previewUrl.set(null);
     }
+  }
+
+  private resetSelectedFile(fileInput?: HTMLInputElement): void {
+    const input = fileInput ?? this.fileInput?.nativeElement;
+
+    if (input) {
+      input.value = '';
+    }
+
+    this.selectedFile.set(null);
+    this.revokePreviewUrl();
   }
 
   private applySelectedFile(file: File): void {

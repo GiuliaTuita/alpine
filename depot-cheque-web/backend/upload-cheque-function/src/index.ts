@@ -1,18 +1,19 @@
-import { randomUUID } from 'node:crypto';
 import { HttpFunction, http } from '@google-cloud/functions-framework';
 import { Storage } from '@google-cloud/storage';
 import Busboy from 'busboy';
 import cors from 'cors';
+import {
+  REGISTRATION_NUMBER_REQUIRED_MESSAGE,
+  UPLOAD_MAX_FILE_SIZE_BYTES,
+  extensionForUpload,
+  formatTimestampForFilename,
+  getRegistrationNumberValidationMessage,
+  isAllowedUploadMimeType,
+  normalizeRegistrationNumber,
+  normalizeUploadMimeType,
+} from './shared/upload-rules';
 
 const storage = new Storage();
-const maxFileSizeBytes = 10 * 1024 * 1024;
-const allowedMimeTypes = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/heic',
-  'image/heif',
-]);
 const allowedOrigins = (process.env.ALLOWED_ORIGIN ?? '')
   .split(',')
   .map((origin) => origin.trim())
@@ -27,6 +28,11 @@ interface UploadedImage {
   buffer: Buffer;
   filename: string;
   mimeType: string;
+}
+
+interface UploadPayload {
+  image: UploadedImage;
+  registrationNumber: string;
 }
 
 class HttpError extends Error {
@@ -99,35 +105,42 @@ function verifySharedCredentials(authorizationHeader?: string): string {
   return username;
 }
 
-function extensionForMimeType(mimeType: string): string {
-  switch (mimeType) {
-    case 'image/jpeg':
-      return 'jpg';
-    case 'image/png':
-      return 'png';
-    case 'image/webp':
-      return 'webp';
-    case 'image/heic':
-      return 'heic';
-    case 'image/heif':
-      return 'heif';
-    default:
-      throw new HttpError(400, 'Type de fichier non supporte.');
+function readRegistrationNumber(value: string): string {
+  const validationMessage = getRegistrationNumberValidationMessage(value);
+
+  if (validationMessage) {
+    throw new HttpError(400, validationMessage);
   }
+
+  return normalizeRegistrationNumber(value);
 }
 
-function readUploadedImage(rawBody: Buffer, headers: Record<string, string | string[] | undefined>) {
-  return new Promise<UploadedImage>((resolve, reject) => {
+function readUploadPayload(rawBody: Buffer, headers: Record<string, string | string[] | undefined>) {
+  return new Promise<UploadPayload>((resolve, reject) => {
     const busboy = Busboy({
       headers,
       limits: {
         files: 1,
-        fileSize: maxFileSizeBytes,
+        fileSize: UPLOAD_MAX_FILE_SIZE_BYTES,
       },
     });
 
     let upload: UploadedImage | null = null;
+    let registrationNumber = '';
     let aborted = false;
+
+    busboy.on('field', (fieldname, value) => {
+      if (fieldname !== 'registrationNumber') {
+        return;
+      }
+
+      try {
+        registrationNumber = readRegistrationNumber(value);
+      } catch (error) {
+        aborted = true;
+        reject(error);
+      }
+    });
 
     busboy.on('file', (fieldname, file, info) => {
       if (fieldname !== 'image') {
@@ -135,7 +148,12 @@ function readUploadedImage(rawBody: Buffer, headers: Record<string, string | str
         return;
       }
 
-      if (!allowedMimeTypes.has(info.mimeType)) {
+      const normalizedMimeType = normalizeUploadMimeType({
+        name: info.filename,
+        type: info.mimeType,
+      });
+
+      if (!normalizedMimeType || !isAllowedUploadMimeType(normalizedMimeType)) {
         aborted = true;
         reject(new HttpError(400, "Le type MIME du fichier n'est pas autorise."));
         file.resume();
@@ -157,7 +175,7 @@ function readUploadedImage(rawBody: Buffer, headers: Record<string, string | str
         upload = {
           buffer: Buffer.concat(chunks),
           filename: info.filename,
-          mimeType: info.mimeType,
+          mimeType: normalizedMimeType,
         };
       });
     });
@@ -172,7 +190,15 @@ function readUploadedImage(rawBody: Buffer, headers: Record<string, string | str
         return;
       }
 
-      resolve(upload);
+      if (!registrationNumber) {
+        reject(new HttpError(400, REGISTRATION_NUMBER_REQUIRED_MESSAGE));
+        return;
+      }
+
+      resolve({
+        image: upload,
+        registrationNumber,
+      });
     });
 
     busboy.on('error', (error) => reject(error));
@@ -230,10 +256,15 @@ const uploadCheque: HttpFunction = async (req, res) => {
     }
 
     const bucketName = getRequiredEnv('GCS_BUCKET_NAME');
-    const image = await readUploadedImage(req.rawBody ?? Buffer.from([]), req.headers);
-    const extension = extensionForMimeType(image.mimeType);
-    const uploadedAt = new Date().toISOString();
-    const fileId = `${Date.now()}-${randomUUID()}.${extension}`;
+    const { image, registrationNumber } = await readUploadPayload(
+      req.rawBody ?? Buffer.from([]),
+      req.headers,
+    );
+    const now = new Date();
+    const uploadedAt = now.toISOString();
+    const timestamp = formatTimestampForFilename(now);
+    const extension = extensionForUpload({ name: image.filename }, image.mimeType);
+    const fileId = `${registrationNumber}_${timestamp}.${extension}`;
     const storagePath = `cheques/${sanitizePathSegment(username)}/${fileId}`;
     const file = storage.bucket(bucketName).file(storagePath);
 
@@ -242,6 +273,7 @@ const uploadCheque: HttpFunction = async (req, res) => {
       filename: image.filename,
       mimeType: image.mimeType,
       size: image.buffer.length,
+      registrationNumber,
       storagePath,
     });
 
@@ -253,6 +285,7 @@ const uploadCheque: HttpFunction = async (req, res) => {
           originalFilename: image.filename,
           uploadedAt,
           uploadedBy: username,
+          registrationNumber,
         },
       },
     });
@@ -270,6 +303,7 @@ const uploadCheque: HttpFunction = async (req, res) => {
       gsUri: `gs://${bucketName}/${storagePath}`,
       contentType: image.mimeType,
       uploadedAt,
+      registrationNumber,
     });
   } catch (error) {
     if (error instanceof HttpError) {

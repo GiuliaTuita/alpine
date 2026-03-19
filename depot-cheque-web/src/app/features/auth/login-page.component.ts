@@ -45,17 +45,6 @@ import { AuthService } from '../../core/auth/auth.service';
             </div>
           </div>
 
-          <div class="feature-list">
-            <div class="feature-item">
-              <span class="material-symbols-outlined">verified_user</span>
-              <span>Acces securise reserve aux personnes autorisees</span>
-            </div>
-            <div class="feature-item">
-              <span class="material-symbols-outlined">smartphone</span>
-              <span>Parcours pense pour une utilisation simple sur telephone</span>
-            </div>
-          </div>
-
           @if (!authService.configured()) {
             <section class="warning-box">
               <strong>Configuration requise</strong>

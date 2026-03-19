@@ -73,28 +73,6 @@
   line-height: 1.6;
 }
 
-.feature-list {
-  display: grid;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.feature-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: var(--brand-surface-muted);
-  color: var(--brand-dark-soft);
-  border: 1px solid rgba(35, 33, 38, 0.05);
-}
-
-.feature-item .material-symbols-outlined {
-  margin-top: 2px;
-  color: var(--brand-green);
-}
-
 .warning-box,
 .error-box {
   border-radius: 16px;
